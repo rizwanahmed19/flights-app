@@ -10,10 +10,12 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import { formatDate } from '../../utils';
 import TableHead from './TableHead';
 import TableToolbar from './TableToolbar';
+import { IconButton } from '../Button';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,28 +37,28 @@ const ORDER = {
   DESC: 'desc',
 };
 
-const Table = ({ tableData, tableHeadData, history }) => {
+const Table = ({ tableData, tableHeadData, onDeleteClick, history }) => {
   const classes = useStyles();
   const [order, setOrder] = useState(ORDER.ASC);
   const [orderBy, setOrderBy] = useState('departure');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  function handleRequestSort(event, property) {
+  const handleRequestSort = (event, property) => {
     const isDesc = orderBy === property && order === ORDER.DESC;
     setOrder(isDesc ? ORDER.ASC : ORDER.DESC);
     setOrderBy(property);
-  }
+  };
 
-  function handleChangePage(e, newPage) {
+  const handleChangePage = (e, newPage) => {
     setPage(newPage);
-  }
+  };
 
-  function handleChangeRowsPerPage(e) {
+  const handleChangeRowsPerPage = e => {
     setRowsPerPage(e.target.value);
-  }
+  };
 
-  function desc(a, b, orderBy) {
+  const desc = (a, b, orderBy) => {
     if (b[orderBy] < a[orderBy]) {
       return -1;
     }
@@ -66,9 +68,9 @@ const Table = ({ tableData, tableHeadData, history }) => {
     }
 
     return 0;
-  }
+  };
 
-  function stableSort(data, cmp) {
+  const stableSort = (data, cmp) => {
     const stabilized = data.map((d, idx) => [d, idx]);
     stabilized.sort((a, b) => {
       const order = cmp(a[0], b[0]);
@@ -76,21 +78,34 @@ const Table = ({ tableData, tableHeadData, history }) => {
       return a[1] - b[1];
     });
     return stabilized.map(s => s[0]);
-  }
+  };
 
-  function getComparator(order, orderBy) {
+  const getComparator = (order, orderBy) => {
     return order === ORDER.DESC
       ? (a, b) => desc(a, b, orderBy)
       : (a, b) => -desc(a, b, orderBy);
-  }
+  };
 
-  function renderCells(data) {
+  const handleDeleteClick = id => e => {
+    e.stopPropagation();
+    onDeleteClick(id);
+  };
+
+  const renderCells = data => {
     return tableHeadData.map(t => (
       <TableCell key={t.id} component="td" scope="row">
-        {t.date ? formatDate(data[t.id]) : data[t.id]}
+        {t.delete ? (
+          <IconButton onClick={handleDeleteClick(data.id)}>
+            <DeleteIcon />
+          </IconButton>
+        ) : t.date ? (
+          formatDate(data[t.id])
+        ) : (
+          data[t.id]
+        )}
       </TableCell>
     ));
-  }
+  };
 
   return (
     <Paper className={classes.root}>

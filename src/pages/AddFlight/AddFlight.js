@@ -10,9 +10,12 @@ import {
   Radio,
   RadioGroup,
 } from '@material-ui/core';
-import { Formik, Form } from 'formik';
+import { Formik, Form, ErrorMessage } from 'formik';
+import { connect } from 'react-redux';
+import * as Yup from 'yup';
 
 import { formatDate } from '../../utils';
+import { addFlight, updateFlight } from '../../redux/actions';
 import { MainContainer } from '../../components/Container';
 
 const styles = theme => ({
@@ -25,6 +28,12 @@ const styles = theme => ({
   },
   textField: {
     marginBottom: 40,
+  },
+  error: {
+    fontFamily: 'Roboto',
+    color: '#f00',
+    marginTop: 3,
+    fontSize: 15,
   },
 });
 
@@ -41,19 +50,51 @@ const formData = {
   flightType: FLIGHT.CHEAP,
 };
 
+const validationSchema = Yup.object().shape({
+  departure: Yup.string().required('Required'),
+  arrival: Yup.string().required('Required'),
+});
+
 const AddFlight = props => {
-  const { classes } = props;
-  const [state] = useState(formData);
+  const { classes, flights, addFlight, updateFlight, match, history } = props;
+  const {
+    params: { id },
+  } = match;
+  const [state, setState] = useState(formData);
 
   useEffect(() => {
-    if (props.match.params.id) {
-      console.log(props.match.params.id);
+    if (id) {
+      if (flights.length === 0) {
+        return history.goBack();
+      }
+      const flight = flights.find(x => x.id == id);
+      setState({
+        departure: flight.departure,
+        arrival: flight.arrival,
+        departureTime: formatDate(flight.departureTime),
+        arrivalTime: formatDate(flight.arrivalTime),
+        flightType: flight.class,
+      });
     }
-  }, [props.match.params.id]);
+  }, [id, flights.length]);
 
   const handleSubmit = (values, { setSubmitting }) => {
-    console.log('FORM SUBMITTED', values);
+    const data = {
+      departure: values.departure,
+      arrival: values.arrival,
+      departureTime: values.departureTime,
+      arrivalTime: values.arrivalTime,
+      class: values.flightType,
+    };
+
+    if (!id) {
+      addFlight(data);
+    } else {
+      updateFlight({ ...data, id });
+    }
+
     setSubmitting(false);
+    history.goBack();
   };
 
   return (
@@ -64,29 +105,44 @@ const AddFlight = props => {
           variant="h4"
           align="center"
         >
-          Add Flight
+          {id ? 'Update Flight' : 'Add Flight'}
         </Typography>
-        <Formik initialValues={state} onSubmit={handleSubmit}>
+        <Formik
+          enableReinitialize
+          initialValues={state}
+          onSubmit={handleSubmit}
+          validationSchema={validationSchema}
+        >
           {({ values, handleChange, isSubmitting }) => (
             <Form>
-              <TextField
-                fullWidth
-                id="departure"
-                name="departure"
-                label="Departure"
-                onChange={handleChange}
-                variant="outlined"
-                classes={{ root: classes.textField }}
-              />
-              <TextField
-                fullWidth
-                id="arrival"
-                name="arrival"
-                label="Arrival"
-                onChange={handleChange}
-                variant="outlined"
-                classes={{ root: classes.textField }}
-              />
+              <div className={classes.textField}>
+                <TextField
+                  fullWidth
+                  id="departure"
+                  name="departure"
+                  label="Departure"
+                  onChange={handleChange}
+                  variant="outlined"
+                  value={values.departure}
+                />
+                <ErrorMessage name="departure">
+                  {msg => <div className={classes.error}>{msg}</div>}
+                </ErrorMessage>
+              </div>
+              <div className={classes.textField}>
+                <TextField
+                  fullWidth
+                  id="arrival"
+                  name="arrival"
+                  label="Arrival"
+                  onChange={handleChange}
+                  variant="outlined"
+                  value={values.arrival}
+                />
+                <ErrorMessage name="arrival">
+                  {msg => <div className={classes.error}>{msg}</div>}
+                </ErrorMessage>
+              </div>
               <Grid
                 container
                 justify="space-between"
@@ -149,7 +205,7 @@ const AddFlight = props => {
                     variant="contained"
                     disabled={isSubmitting}
                   >
-                    Add
+                    {id ? 'Update' : 'Add'}
                   </Button>
                 </Grid>
               </Grid>
@@ -161,4 +217,18 @@ const AddFlight = props => {
   );
 };
 
-export default withStyles(styles)(AddFlight);
+const mapStateToProps = ({ flights }) => ({
+  flights: flights.data,
+});
+
+const mapDispatchToProps = dispatch => ({
+  addFlight: data => dispatch(addFlight(data)),
+  updateFlight: data => dispatch(updateFlight(data)),
+});
+
+export default withStyles(styles)(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+  )(AddFlight),
+);

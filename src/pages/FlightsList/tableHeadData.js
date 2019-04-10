@@ -17,4 +17,13 @@ export default [
     label: 'Arrival Time',
     date: true,
   },
+  {
+    id: 'class',
+    label: 'Flight Class',
+  },
+  {
+    id: 'delete',
+    delete: true,
+    label: 'Flight Class',
+  },
 ];

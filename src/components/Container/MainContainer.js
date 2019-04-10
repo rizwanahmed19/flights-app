@@ -7,7 +7,7 @@ const MainContainer = ({ children, col }) => (
     container
     alignItems="flex-start"
     justify="center"
-    style={{ minHeight: 'calc(100vh - 9rem)', marginTop: '5rem' }}
+    style={{ minHeight: 'calc(100vh - 14rem)', margin: '5rem 0' }}
   >
     <Grid item xs={col}>
       {children}
