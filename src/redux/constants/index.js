@@ -6,3 +6,8 @@ export const FLIGHTS = {
   DELETE: 'FLIGHT_DELETE',
   UPDATE: 'FLIGHT_UPDATE',
 };
+
+export const SNACKBAR = {
+  OPEN: 'SNACKBAR_OPEN',
+  CLOSE: 'SNACKBAR_CLOSE',
+};

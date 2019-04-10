@@ -1,15 +1,33 @@
-import React from 'react';
-import { Provider } from 'react-redux';
+import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
 
-import configureStore from './redux/store';
 import Routes from './routes';
+import { closeSnackbar } from './redux/actions';
+import { Snackbar } from './components/Snackbar';
 
-const store = configureStore();
+const App = ({ open, text, closeSnackbar }) => {
+  const handleClose = () => {
+    closeSnackbar();
+  };
 
-const App = () => (
-  <Provider store={store}>
-    <Routes />
-  </Provider>
-);
+  return (
+    <Fragment>
+      <Routes />
+      <Snackbar open={open} text={text} onClose={handleClose} />
+    </Fragment>
+  );
+};
 
-export default App;
+const mapStateToProps = ({ snackbar }) => ({
+  open: snackbar.open,
+  text: snackbar.text,
+});
+
+const mapDispatchToProps = dispatch => ({
+  closeSnackbar: () => dispatch(closeSnackbar()),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(App);

@@ -15,7 +15,7 @@ import { connect } from 'react-redux';
 import * as Yup from 'yup';
 
 import { formatDate } from '../../utils';
-import { addFlight, updateFlight } from '../../redux/actions';
+import { addFlight, updateFlight, openSnackbar } from '../../redux/actions';
 import { MainContainer } from '../../components/Container';
 
 const styles = theme => ({
@@ -56,7 +56,15 @@ const validationSchema = Yup.object().shape({
 });
 
 const AddFlight = props => {
-  const { classes, flights, addFlight, updateFlight, match, history } = props;
+  const {
+    classes,
+    flights,
+    addFlight,
+    updateFlight,
+    openSnackbar,
+    match,
+    history,
+  } = props;
   const {
     params: { id },
   } = match;
@@ -89,8 +97,10 @@ const AddFlight = props => {
 
     if (!id) {
       addFlight(data);
+      openSnackbar('Flight added');
     } else {
       updateFlight({ ...data, id });
+      openSnackbar('Flight updated');
     }
 
     setSubmitting(false);
@@ -224,6 +234,7 @@ const mapStateToProps = ({ flights }) => ({
 const mapDispatchToProps = dispatch => ({
   addFlight: data => dispatch(addFlight(data)),
   updateFlight: data => dispatch(updateFlight(data)),
+  openSnackbar: text => dispatch(openSnackbar(text)),
 });
 
 export default withStyles(styles)(

@@ -37,7 +37,13 @@ const ORDER = {
   DESC: 'desc',
 };
 
-const Table = ({ tableData, tableHeadData, onDeleteClick, history }) => {
+const Table = ({
+  tableData,
+  tableHeadData,
+  onDeleteClick,
+  onChange,
+  history,
+}) => {
   const classes = useStyles();
   const [order, setOrder] = useState(ORDER.ASC);
   const [orderBy, setOrderBy] = useState('departure');
@@ -109,7 +115,7 @@ const Table = ({ tableData, tableHeadData, onDeleteClick, history }) => {
 
   return (
     <Paper className={classes.root}>
-      <TableToolbar title="Flights" btnText="Add Flight" />
+      <TableToolbar title="Flights" btnText="Add Flight" onChange={onChange} />
       <div className={classes.tableWrapper}>
         <MuiTable className={classes.table}>
           <TableHead
@@ -157,6 +163,8 @@ const Table = ({ tableData, tableHeadData, onDeleteClick, history }) => {
 Table.propTypes = {
   tableData: PropTypes.array.isRequired,
   tableHeadData: PropTypes.array.isRequired,
+  onDeleteClick: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default withRouter(Table);
